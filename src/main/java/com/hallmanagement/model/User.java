@@ -1,10 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.hallmanagement.model;
 
-public abstract class User {
+public class User {
     private int id;
     private String name;
     private String email;
@@ -12,7 +8,8 @@ public abstract class User {
     private String role;
     private String phone;
 
-    public User() {}
+    public User() {
+    }
 
     public User(int id, String name, String email, String password, String role, String phone) {
         this.id = id;
