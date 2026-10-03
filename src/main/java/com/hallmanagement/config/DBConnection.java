@@ -7,18 +7,20 @@ import java.sql.SQLException;
 public class DBConnection {
     private static final String URL = "jdbc:mysql://localhost:3306/hall_meal_db";
     private static final String USER = "root"; // আপনার MySQL username
-    private static final String PASSWORD = "RawnakSQL2007"; // আপনার MySQL password
+    private static final String PASSWORD = "sqlofshuborna"; // আপনার MySQL password
 
     private DBConnection() {}
 
+    // Always return a fresh connection
     public static Connection getConnection() {
-        Connection conn = null;
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            conn = DriverManager.getConnection(URL, USER, PASSWORD);
+            Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+            System.out.println("Database connected successfully!");
+            return conn;
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
+            return null;
         }
-        return conn;
     }
 }
