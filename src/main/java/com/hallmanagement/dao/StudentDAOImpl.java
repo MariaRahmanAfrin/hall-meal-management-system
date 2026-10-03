@@ -135,4 +135,8 @@ public class StudentDAOImpl implements GenericDAO<Student> {
             return false;
         }
     }
+
+    public Student getStudentByRoll(String username) {
+    return null; // অথবা প্রয়োজন না থাকলে মেথডটি খালি রাখতে পারেন
+}
 }
