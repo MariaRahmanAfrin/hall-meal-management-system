@@ -10,6 +10,24 @@ import java.util.List;
 
 public class MenuDAOImpl {
 
+    // Member 3 (Student Billing) Needs: Single Meal Price Fetcher
+    public static double getMealPrice(String mealType) {
+        double price = 0.0;
+        try (Connection conn = DBConnection.getConnection()) {
+            String sql = "SELECT price FROM meal_prices WHERE meal_type = ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, mealType);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                price = rs.getDouble("price");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return price;
+    }
+
+    // Member 2 (Admin Menu Management) Needs: Fetch Weekly Menu
     public List<MenuItem> getWeeklyMenu() {
         List<MenuItem> menuList = new ArrayList<>();
         String query = "SELECT day_name, breakfast_item, lunch_item, dinner_item FROM weekly_menu";
@@ -30,6 +48,7 @@ public class MenuDAOImpl {
         return menuList;
     }
 
+    // Member 2 Update Day Menu (Proper DB Column Names)
     public boolean updateDayMenu(String dayName, String breakfast, String lunch, String dinner) {
         String query = "UPDATE weekly_menu SET breakfast_item = ?, lunch_item = ?, dinner_item = ? WHERE day_name = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -45,6 +64,7 @@ public class MenuDAOImpl {
         }
     }
 
+    // Member 2 Meal Prices Object Fetcher
     public MealPrice getMealPrices() {
         String query = "SELECT breakfast_price, lunch_price, dinner_price FROM meal_prices WHERE id = 1";
         try (Connection conn = DBConnection.getConnection();
@@ -62,36 +82,36 @@ public class MenuDAOImpl {
         }
         return new MealPrice(0.0, 0.0, 0.0);
     }
+
+    // Member 2 Update Meal Prices
     public boolean updateMealPrices(double breakfast, double lunch, double dinner) {
-    String query = "UPDATE meal_prices SET breakfast_price = ?, lunch_price = ?, dinner_price = ? WHERE id = 1";
+        String query = "UPDATE meal_prices SET breakfast_price = ?, lunch_price = ?, dinner_price = ? WHERE id = 1";
 
-    try (Connection conn = DBConnection.getConnection();
-         PreparedStatement pstmt = conn.prepareStatement(query)) {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
 
-        pstmt.setDouble(1, breakfast);
-        pstmt.setDouble(2, lunch);
-        pstmt.setDouble(3, dinner);
+            pstmt.setDouble(1, breakfast);
+            pstmt.setDouble(2, lunch);
+            pstmt.setDouble(3, dinner);
 
-        return pstmt.executeUpdate() > 0;
+            return pstmt.executeUpdate() > 0;
 
-    } catch (SQLException e) {
-        e.printStackTrace();
-        return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
-}
+
     public static void main(String[] args) {
         MenuDAOImpl dao = new MenuDAOImpl();
         
-        // 1. Fetch Weekly Menu Test
         System.out.println("--- Fetching Weekly Menu ---");
         for (MenuItem item : dao.getWeeklyMenu()) {
             System.out.println(item.getDayName() + ": " + item.getBreakfastItem() + ", " + item.getLunchItem() + ", " + item.getDinnerItem());
         }
         
-        // 2. Fetch Meal Prices Test
         MealPrice price = dao.getMealPrices();
         System.out.println("--- Fetching Meal Prices ---");
         System.out.println("Breakfast: " + price.getBreakfastPrice() + ", Lunch: " + price.getLunchPrice() + ", Dinner: " + price.getDinnerPrice());
     }
-
 }
