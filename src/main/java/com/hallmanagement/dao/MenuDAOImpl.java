@@ -1,11 +1,7 @@
 package com.hallmanagement.dao;
 
 import com.hallmanagement.config.DBConnection;
-import com.hallmanagement.model.MenuItem;
 import com.hallmanagement.model.MealPrice;
-import com.hallmanagement.model.MealPrice;
-import com.hallmanagement.model.MealPrice;
-import com.hallmanagement.model.MenuItem;
 import com.hallmanagement.model.MenuItem;
 
 import java.sql.*;
@@ -66,6 +62,23 @@ public class MenuDAOImpl {
         }
         return new MealPrice(0.0, 0.0, 0.0);
     }
+    public boolean updateMealPrices(double breakfast, double lunch, double dinner) {
+    String query = "UPDATE meal_prices SET breakfast_price = ?, lunch_price = ?, dinner_price = ? WHERE id = 1";
+
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+        pstmt.setDouble(1, breakfast);
+        pstmt.setDouble(2, lunch);
+        pstmt.setDouble(3, dinner);
+
+        return pstmt.executeUpdate() > 0;
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
     public static void main(String[] args) {
         MenuDAOImpl dao = new MenuDAOImpl();
         
