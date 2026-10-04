@@ -1,116 +1,130 @@
 package com.hallmanagement.ui;
 
-import com.hallmanagement.dao.StudentDAOImpl;
-import com.hallmanagement.model.Student;
+import com.hallmanagement.config.DBConnection;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class LoginFrame extends JFrame {
-    private JTextField txtUsername;
+
+    private JTextField txtEmail;
     private JPasswordField txtPassword;
-    private JComboBox<String> comboRole;
     private JButton btnLogin;
+    private JButton btnRegister;
 
     public LoginFrame() {
-        setTitle("Hall Meal Management System - Login");
+        setTitle("Hall Management System - Login");
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); // স্ক্রিনের মাঝে দেখাবে
-        setLayout(new GridBagLayout());
+        setLocationRelativeTo(null);
+        setResizable(false);
+        setLayout(new BorderLayout(10, 10));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 8, 8, 8);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        JLabel lblHeader = new JLabel("LOGIN", SwingConstants.CENTER);
+        lblHeader.setFont(new Font("Arial", Font.BOLD, 22));
+        lblHeader.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
+        add(lblHeader, BorderLayout.NORTH);
 
-        // Title
-        JLabel lblTitle = new JLabel("LOGIN", SwingConstants.CENTER);
-        lblTitle.setFont(new Font("Arial", Font.BOLD, 20));
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
-        add(lblTitle, gbc);
+        JPanel formPanel = new JPanel(new GridLayout(2, 2, 10, 15));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 10, 40));
 
-        // Role Selection
-        gbc.gridwidth = 1;
-        gbc.gridx = 0; gbc.gridy = 1;
-        add(new JLabel("Role:"), gbc);
+        JLabel lblEmail = new JLabel("Email:");
+        lblEmail.setFont(new Font("Arial", Font.PLAIN, 14));
+        txtEmail = new JTextField();
 
-        comboRole = new JComboBox<>(new String[]{"Student", "Admin"});
-        gbc.gridx = 1; gbc.gridy = 1;
-        add(comboRole, gbc);
+        JLabel lblPassword = new JLabel("Password:");
+        lblPassword.setFont(new Font("Arial", Font.PLAIN, 14));
+        txtPassword = new JPasswordField();
 
-        // Username / Roll / Email
-        gbc.gridx = 0; gbc.gridy = 2;
-        add(new JLabel("Username/Email:"), gbc);
+        formPanel.add(lblEmail);
+        formPanel.add(txtEmail);
+        formPanel.add(lblPassword);
+        formPanel.add(txtPassword);
 
-        txtUsername = new JTextField(15);
-        gbc.gridx = 1; gbc.gridy = 2;
-        add(txtUsername, gbc);
+        add(formPanel, BorderLayout.CENTER);
 
-        // Password
-        gbc.gridx = 0; gbc.gridy = 3;
-        add(new JLabel("Password:"), gbc);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 20, 10));
 
-        txtPassword = new JPasswordField(15);
-        gbc.gridx = 1; gbc.gridy = 3;
-        add(txtPassword, gbc);
-
-        // Login Button
         btnLogin = new JButton("Login");
-        btnLogin.setBackground(new Color(52, 152, 219));
-        btnLogin.setForeground(Color.WHITE);
-        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
-        add(btnLogin, gbc);
+        btnRegister = new JButton("Register");
 
-        // Button Action Event
-        btnLogin.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleLogin();
-            }
+        btnLogin.setFont(new Font("Arial", Font.BOLD, 14));
+        btnRegister.setFont(new Font("Arial", Font.PLAIN, 12));
+
+        buttonPanel.add(btnLogin);
+        buttonPanel.add(btnRegister);
+
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        btnLogin.addActionListener(e -> handleLogin());
+        btnRegister.addActionListener(e -> {
+            this.dispose();
+            openFrameSafely("com.hallmanagement.ui.StudentRegisterFrame");
         });
     }
 
     private void handleLogin() {
-        String username = txtUsername.getText().trim();
+        String email = txtEmail.getText().trim();
         String password = new String(txtPassword.getPassword()).trim();
-        String role = (String) comboRole.getSelectedItem();
 
-        if (username.isEmpty() || password.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill in all fields!", "Warning", JOptionPane.WARNING_MESSAGE);
+        if (email.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter both Email and Password!", "Validation Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        if ("Admin".equals(role)) {
-            if ("admin".equals(username) && "admin123".equals(password)) {
-                JOptionPane.showMessageDialog(this, "Admin Login Successful!");
-                this.dispose();
-                // Admin Dashboard call hobe
-            } else {
-                JOptionPane.showMessageDialog(this, "Invalid Admin Credentials!", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        } else {
-            // ডাটাবেজ দিয়ে স্টুডেন্ট অথেন্টিকেশন
-            StudentDAOImpl studentDAO = new StudentDAOImpl();
-            Student student = studentDAO.authenticateUser(username, password);
+        String query = "SELECT * FROM users WHERE LOWER(email) = LOWER(?) AND password = ?";
 
-            if (student != null) {
-                JOptionPane.showMessageDialog(this, "Welcome " + student.getName() + "! Student Login Successful.");
-                
-                // LoginFrame বন্ধ হবে
-                this.dispose(); 
-                
-                // ডাটাবেজের সেই আসল Student object পাঠিয়া Dashboard ওপেন হবে
-                new StudentDashboard(student).setVisible(true); 
-            } else {
-                JOptionPane.showMessageDialog(this, "Invalid Student Email or Password!", "Login Failed", JOptionPane.ERROR_MESSAGE);
+        try (Connection conn = DBConnection.getConnection()) {
+
+            if (conn == null) {
+                JOptionPane.showMessageDialog(this, "Failed to connect to Database!", "DB Error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
+
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.setString(1, email);
+                pstmt.setString(2, password);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        String role = rs.getString("role");
+
+                        JOptionPane.showMessageDialog(this, "Login Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                        this.dispose();
+
+                        // Role check kore respective Dashboard call:
+                        if (role != null && role.trim().equalsIgnoreCase("ADMIN")) {
+                            new AdminDashboard().setVisible(true); // Member 2-er Admin Dashboard
+                        } else {
+                            new StudentDashboard().setVisible(true); // Student Dashboard
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Invalid Email or Password!", "Login Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Database Error: " + ex.getMessage(), "DB Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
+    }
+
+    private void openFrameSafely(String className) {
+        try {
+            Class<?> cls = Class.forName(className);
+            JFrame frame = (JFrame) cls.getDeclaredConstructor().newInstance();
+            frame.setVisible(true);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Frame open kora jacche na: " + className + "\nError: " + ex.getMessage());
         }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new LoginFrame().setVisible(true);
-        });
+        SwingUtilities.invokeLater(() -> new LoginFrame().setVisible(true));
     }
 }
