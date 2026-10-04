@@ -13,11 +13,24 @@ public class MenuDAOImpl {
     // Member 3 (Student Billing) Needs: Single Meal Price Fetcher
     public static double getMealPrice(String mealType) {
         double price = 0.0;
-        try (Connection conn = DBConnection.getConnection()) {
-            String sql = "SELECT price FROM meal_prices WHERE meal_type = ?";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, mealType);
-            ResultSet rs = ps.executeQuery();
+        String columnName = "";
+
+        if ("Breakfast".equalsIgnoreCase(mealType)) {
+            columnName = "breakfast_price";
+        } else if ("Lunch".equalsIgnoreCase(mealType)) {
+            columnName = "lunch_price";
+        } else if ("Dinner".equalsIgnoreCase(mealType)) {
+            columnName = "dinner_price";
+        } else {
+            return price;
+        }
+
+        String sql = "SELECT " + columnName + " AS price FROM meal_prices WHERE id = 1";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
             if (rs.next()) {
                 price = rs.getDouble("price");
             }
@@ -48,7 +61,7 @@ public class MenuDAOImpl {
         return menuList;
     }
 
-    // Member 2 Update Day Menu (Proper DB Column Names)
+    // Member 2 Update Day Menu
     public boolean updateDayMenu(String dayName, String breakfast, String lunch, String dinner) {
         String query = "UPDATE weekly_menu SET breakfast_item = ?, lunch_item = ?, dinner_item = ? WHERE day_name = ?";
         try (Connection conn = DBConnection.getConnection();

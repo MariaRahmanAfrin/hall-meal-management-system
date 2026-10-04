@@ -122,6 +122,24 @@ public class StudentDAOImpl implements GenericDAO<Student> {
         }
     }
 
+    // Day 3 Task: Member 1 Specific Profile Update Method
+    public boolean updateProfile(int studentId, String name, String phone, String password) {
+        String query = "UPDATE users SET name = ?, phone = ?, password = ? WHERE id = ? AND role = 'STUDENT'";
+        Connection conn = DBConnection.getConnection();
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, name);
+            stmt.setString(2, phone);
+            stmt.setString(3, password);
+            stmt.setInt(4, studentId);
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     @Override
     public boolean delete(int id) {
         String query = "DELETE FROM users WHERE id = ? AND role = 'STUDENT'";
@@ -137,6 +155,6 @@ public class StudentDAOImpl implements GenericDAO<Student> {
     }
 
     public Student getStudentByRoll(String username) {
-    return null; // অথবা প্রয়োজন না থাকলে মেথডটি খালি রাখতে পারেন
-}
+        return null;
+    }
 }

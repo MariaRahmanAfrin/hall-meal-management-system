@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.hallmanagement.ui;
 
 import com.hallmanagement.dao.StudentDAOImpl;
@@ -10,7 +6,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 
 public class LoginFrame extends JFrame {
     private JTextField txtUsername;
@@ -44,9 +39,9 @@ public class LoginFrame extends JFrame {
         gbc.gridx = 1; gbc.gridy = 1;
         add(comboRole, gbc);
 
-        // Username / Roll
+        // Username / Roll / Email
         gbc.gridx = 0; gbc.gridy = 2;
-        add(new JLabel("Username/Roll:"), gbc);
+        add(new JLabel("Username/Email:"), gbc);
 
         txtUsername = new JTextField(15);
         gbc.gridx = 1; gbc.gridy = 2;
@@ -76,36 +71,42 @@ public class LoginFrame extends JFrame {
         });
     }
 
-   private void handleLogin() {
-    String username = txtUsername.getText().trim(); // এখানে ইউজারনেম হিসেবে Email নেওয়া হচ্ছে
-    String password = new String(txtPassword.getPassword()).trim();
-    String role = (String) comboRole.getSelectedItem();
+    private void handleLogin() {
+        String username = txtUsername.getText().trim();
+        String password = new String(txtPassword.getPassword()).trim();
+        String role = (String) comboRole.getSelectedItem();
 
-    if (username.isEmpty() || password.isEmpty()) {
-        JOptionPane.showMessageDialog(this, "Please fill in all fields!", "Warning", JOptionPane.WARNING_MESSAGE);
-        return;
-    }
-
-    if ("Admin".equals(role)) {
-        if ("admin".equals(username) && "admin123".equals(password)) {
-            JOptionPane.showMessageDialog(this, "Admin Login Successful!");
-            this.dispose();
-        } else {
-            JOptionPane.showMessageDialog(this, "Invalid Admin Credentials!", "Error", JOptionPane.ERROR_MESSAGE);
+        if (username.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill in all fields!", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
         }
-    } else {
-        // ডাটাবেজ দিয়ে স্টুডেন্ট অথেন্টিকেশন
-        StudentDAOImpl studentDAO = new StudentDAOImpl();
-        Student student = studentDAO.authenticateUser(username, password);
 
-        if (student != null) {
-            JOptionPane.showMessageDialog(this, "Welcome " + student.getName() + "! Student Login Successful.");
-            this.dispose();
+        if ("Admin".equals(role)) {
+            if ("admin".equals(username) && "admin123".equals(password)) {
+                JOptionPane.showMessageDialog(this, "Admin Login Successful!");
+                this.dispose();
+                // Admin Dashboard call hobe
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid Admin Credentials!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         } else {
-            JOptionPane.showMessageDialog(this, "Invalid Student Email or Password!", "Login Failed", JOptionPane.ERROR_MESSAGE);
+            // ডাটাবেজ দিয়ে স্টুডেন্ট অথেন্টিকেশন
+            StudentDAOImpl studentDAO = new StudentDAOImpl();
+            Student student = studentDAO.authenticateUser(username, password);
+
+            if (student != null) {
+                JOptionPane.showMessageDialog(this, "Welcome " + student.getName() + "! Student Login Successful.");
+                
+                // LoginFrame বন্ধ হবে
+                this.dispose(); 
+                
+                // ডাটাবেজের সেই আসল Student object পাঠিয়া Dashboard ওপেন হবে
+                new StudentDashboard(student).setVisible(true); 
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid Student Email or Password!", "Login Failed", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
-}
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
