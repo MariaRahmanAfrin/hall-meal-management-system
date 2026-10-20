@@ -1,6 +1,7 @@
 package com.hallmanagement.ui;
 
 import com.hallmanagement.config.DBConnection;
+import com.hallmanagement.model.Student;
 
 import javax.swing.*;
 import java.awt.*;
@@ -96,11 +97,17 @@ public class LoginFrame extends JFrame {
                         JOptionPane.showMessageDialog(this, "Login Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
                         this.dispose();
 
-                        // Role check kore respective Dashboard call:
                         if (role != null && role.trim().equalsIgnoreCase("ADMIN")) {
-                            new AdminDashboard().setVisible(true); // Member 2-er Admin Dashboard
+                            new AdminDashboard().setVisible(true);
                         } else {
-                            new StudentDashboard().setVisible(true); // Student Dashboard
+                            // Student object mapping and pass session data to StudentDashboard
+                            Student student = new Student();
+                            student.setId(rs.getInt("id"));
+                            student.setName(rs.getString("name"));
+                            student.setEmail(rs.getString("email"));
+                            student.setRole(role);
+                            
+                            new StudentDashboard(student).setVisible(true);
                         }
                     } else {
                         JOptionPane.showMessageDialog(this, "Invalid Email or Password!", "Login Error", JOptionPane.ERROR_MESSAGE);

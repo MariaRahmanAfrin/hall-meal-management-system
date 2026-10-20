@@ -1,100 +1,102 @@
 package com.hallmanagement.ui;
 
+import com.hallmanagement.model.Student;
 import javax.swing.*;
 import java.awt.*;
 
 public class StudentDashboard extends JFrame {
 
-    private JButton btnMealSelection;
-    private JButton btnMealHistory;
-    private JButton btnStudentBill;
-    private JButton btnLogout;
-    private JLabel lblTitle;
-    private JPanel mainPanel;
+    private Student currentStudent;
 
+    // Default constructor for direct testing/GUI builder compatibility
     public StudentDashboard() {
+        this(null);
+    }
+
+    // Dynamic constructor accepting authenticated Student object from LoginFrame
+    public StudentDashboard(Student student) {
+        this.currentStudent = student;
         initComponents();
     }
 
     private void initComponents() {
-        mainPanel = new JPanel();
-        lblTitle = new JLabel();
-        btnMealSelection = new JButton();
-        btnMealHistory = new JButton();
-        btnStudentBill = new JButton();
-        btnLogout = new JButton();
-
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setTitle("Student Dashboard - Hall Management System");
-        setResizable(false);
-
-        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        lblTitle.setForeground(new Color(0, 102, 204));
-        lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
-        lblTitle.setText("Student Dashboard");
-
-        btnMealSelection.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        btnMealSelection.setText("1. Meal Selection");
-        btnMealSelection.addActionListener(evt -> btnMealSelectionActionPerformed());
-
-        btnMealHistory.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        btnMealHistory.setText("2. Meal History");
-        btnMealHistory.addActionListener(evt -> btnMealHistoryActionPerformed());
-
-        btnStudentBill.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        btnStudentBill.setText("3. View Bills");
-        btnStudentBill.addActionListener(evt -> btnStudentBillActionPerformed());
-
-        btnLogout.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        btnLogout.setText("Logout");
-        btnLogout.addActionListener(evt -> btnLogoutActionPerformed());
-
-        // Layout setup
-        mainPanel.setLayout(new GridLayout(3, 1, 10, 15));
-        mainPanel.add(btnMealSelection);
-        mainPanel.add(btnMealHistory);
-        mainPanel.add(btnStudentBill);
-
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        topPanel.add(lblTitle);
-
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        bottomPanel.add(btnLogout);
-
-        getContentPane().setLayout(new BorderLayout(10, 20));
-        getContentPane().add(topPanel, BorderLayout.NORTH);
-        getContentPane().add(mainPanel, BorderLayout.CENTER);
-        getContentPane().add(bottomPanel, BorderLayout.SOUTH);
-
-        pack();
-        setSize(500, 400);
+        setSize(480, 520);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        setResizable(false);
+        setLayout(new BorderLayout(10, 10));
+
+        // Member 1 Task: Dynamic Greeting Header
+        String studentName = (currentStudent != null && currentStudent.getName() != null) 
+                             ? currentStudent.getName() : "Student";
+        JLabel lblHeader = new JLabel("Welcome, " + studentName + "!", SwingConstants.CENTER);
+        lblHeader.setFont(new Font("Arial", Font.BOLD, 22));
+        lblHeader.setForeground(new Color(0, 102, 204));
+        lblHeader.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
+        add(lblHeader, BorderLayout.NORTH);
+
+        // SOW Day 3 Member 1 & Member 3 Required Feature Buttons
+        JPanel menuPanel = new JPanel(new GridLayout(6, 1, 10, 12));
+        menuPanel.setBorder(BorderFactory.createEmptyBorder(10, 40, 20, 40));
+
+        JButton btnSelectMeal = new JButton("Select Meal");
+        JButton btnViewTodayMenu = new JButton("View Today Menu");
+        JButton btnMealHistory = new JButton("Meal History");
+        JButton btnMonthlyBill = new JButton("Monthly Bill");
+        JButton btnMyProfile = new JButton("My Profile");
+        JButton btnLogout = new JButton("Logout");
+
+        // UI Styling
+        Font btnFont = new Font("Arial", Font.PLAIN, 14);
+        btnSelectMeal.setFont(btnFont);
+        btnViewTodayMenu.setFont(btnFont);
+        btnMealHistory.setFont(btnFont);
+        btnMonthlyBill.setFont(btnFont);
+        btnMyProfile.setFont(btnFont);
+        btnLogout.setFont(btnFont);
+
+        menuPanel.add(btnSelectMeal);
+        menuPanel.add(btnViewTodayMenu);
+        menuPanel.add(btnMealHistory);
+        menuPanel.add(btnMonthlyBill);
+        menuPanel.add(btnMyProfile);
+        menuPanel.add(btnLogout);
+
+        add(menuPanel, BorderLayout.CENTER);
+
+        // Navigation Handlers using openFrameSafely for runtime stability
+        btnSelectMeal.addActionListener(e -> openFrameSafely("com.hallmanagement.ui.MealSelectionFrame"));
+        btnViewTodayMenu.addActionListener(e -> openFrameSafely("com.hallmanagement.ui.TodayMenuFrame"));
+        btnMealHistory.addActionListener(e -> openFrameSafely("com.hallmanagement.ui.MealHistoryFrame"));
+        btnMonthlyBill.addActionListener(e -> openFrameSafely("com.hallmanagement.ui.StudentBillFrame"));
+        btnMyProfile.addActionListener(e -> openFrameSafely("com.hallmanagement.ui.StudentProfileFrame"));
+
+        // Member 1 Task: Session Clear & Logout to LoginFrame
+        btnLogout.addActionListener(e -> {
+            this.dispose();
+            new LoginFrame().setVisible(true);
+        });
     }
 
-    private void btnMealSelectionActionPerformed() {
-        openFrameSafely("com.hallmanagement.ui.MealSelectionFrame");
-    }
-
-    private void btnMealHistoryActionPerformed() {
-        openFrameSafely("com.hallmanagement.ui.MealHistoryFrame");
-    }
-
-    private void btnStudentBillActionPerformed() {
-        openFrameSafely("com.hallmanagement.ui.StudentBillFrame");
-    }
-
-    private void btnLogoutActionPerformed() {
-        this.dispose();
-        new LoginFrame().setVisible(true);
-    }
-
+    // Reflection-based safe launcher to prevent compilation failure if sub-frames are still under development
     private void openFrameSafely(String className) {
         try {
             Class<?> cls = Class.forName(className);
-            JFrame frame = (JFrame) cls.getDeclaredConstructor().newInstance();
+            JFrame frame;
+            
+            // Pass current logged-in student if constructor expects Student object
+            try {
+                frame = (JFrame) cls.getDeclaredConstructor(Student.class).newInstance(currentStudent);
+            } catch (NoSuchMethodException e) {
+                frame = (JFrame) cls.getDeclaredConstructor().newInstance();
+            }
+            
             frame.setVisible(true);
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Frame open kora jacche na: " + className + "\nError: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, 
+                "Feature Frame open kora jacche na: " + className + "\nError: " + ex.getMessage(),
+                "Navigation Warning", JOptionPane.WARNING_MESSAGE);
         }
     }
 
