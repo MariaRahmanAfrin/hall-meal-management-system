@@ -191,4 +191,36 @@ public class MealSelectionDAOImpl {
 
         return report.toString();
     }
+    
+    // Count Breakfast, Lunch and Dinner for a specific date
+    public int[] getHeadcountByDate(java.sql.Date date) {
+        int[] counts = new int[3];
+
+        String sql = "SELECT "
+                + "COALESCE(SUM(CASE WHEN breakfast = TRUE THEN 1 ELSE 0 END), 0) AS breakfast_count, "
+                + "COALESCE(SUM(CASE WHEN lunch = TRUE THEN 1 ELSE 0 END), 0) AS lunch_count, "
+                + "COALESCE(SUM(CASE WHEN dinner = TRUE THEN 1 ELSE 0 END), 0) AS dinner_count "
+                + "FROM meal_selections WHERE selection_date = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setDate(1, date);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    counts[0] = rs.getInt("breakfast_count");
+                    counts[1] = rs.getInt("lunch_count");
+                    counts[2] = rs.getInt("dinner_count");
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to load daily headcount", e);
+        }
+
+        return counts;
+    }
+
 }

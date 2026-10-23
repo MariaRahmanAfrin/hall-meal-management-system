@@ -32,6 +32,7 @@ public class AdminDashboard extends javax.swing.JFrame {
         manageMenuButton = new javax.swing.JButton();
         managePriceButton = new javax.swing.JButton();
         logoutButton = new javax.swing.JButton();
+        headcountButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -45,6 +46,9 @@ public class AdminDashboard extends javax.swing.JFrame {
 
         logoutButton.setText("Logout");
         logoutButton.addActionListener(this::logoutButtonActionPerformed);
+
+        headcountButton.setText("Daily Headcount");
+        headcountButton.addActionListener(this::headcountButtonActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -60,8 +64,11 @@ public class AdminDashboard extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(managePriceButton)
                             .addComponent(manageMenuButton)
-                            .addComponent(logoutButton))))
-                .addContainerGap(121, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(logoutButton)
+                                .addGap(41, 41, 41)
+                                .addComponent(headcountButton)))))
+                .addContainerGap(38, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -73,7 +80,9 @@ public class AdminDashboard extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(managePriceButton)
                 .addGap(18, 18, 18)
-                .addComponent(logoutButton)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(logoutButton)
+                    .addComponent(headcountButton))
                 .addContainerGap(108, Short.MAX_VALUE))
         );
 
@@ -97,6 +106,10 @@ this.dispose();
 priceFrame.setVisible(true);
 this.dispose();
     }//GEN-LAST:event_managePriceButtonActionPerformed
+
+    private void headcountButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_headcountButtonActionPerformed
+      new AdminHeadcountFrame().setVisible(true);
+    }//GEN-LAST:event_headcountButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -124,6 +137,7 @@ this.dispose();
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton headcountButton;
     private javax.swing.JButton logoutButton;
     private javax.swing.JButton manageMenuButton;
     private javax.swing.JButton managePriceButton;

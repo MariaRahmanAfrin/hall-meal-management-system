@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class DBConnection {
     private static final String URL = "jdbc:mysql://localhost:3306/hall_meal_db";
     private static final String USER = "root"; // আপনার MySQL username
-    private static final String PASSWORD = "maRia#123"; // আপনার MySQL password
+    private static final String PASSWORD = "RawnakSQL2007"; // আপনার MySQL password
 
     private DBConnection() {}
 
@@ -22,5 +22,18 @@ public class DBConnection {
             e.printStackTrace();
             return null;
         }
+    }
+    public static void main(String[] args) {
+    try (Connection conn = DBConnection.getConnection()) {
+        if (conn != null && !conn.isClosed()) {
+            System.out.println("SUCCESS: Database connected!");
+            System.out.println("Database: " + conn.getCatalog());
+        } else {
+            System.out.println("FAILED: Database connection unsuccessful.");
+        }
+    } catch (SQLException e) {
+        System.out.println("Database test failed.");
+        e.printStackTrace();
+    }
     }
 }
